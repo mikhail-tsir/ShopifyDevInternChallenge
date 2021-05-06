@@ -22,8 +22,6 @@ class UserDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit 
   import dbConfig._
   import profile.api._
 
-  private val users = TableQuery[Users]
-
   override def find(username: String): Future[Option[User]] = db.run {
     users.filter(_.username === username).result.headOption
   }

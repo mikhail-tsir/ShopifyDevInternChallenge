@@ -4,6 +4,5 @@ import views.html.helper.FieldConstructor
 
 object FormFieldTemplate {
   implicit val myFields: FieldConstructor = FieldConstructor(
-    views.html.formFieldTemplates.formFieldTemplate(_)
-  )
+    views.html.formFieldTemplates.formFieldTemplate(_))
 }

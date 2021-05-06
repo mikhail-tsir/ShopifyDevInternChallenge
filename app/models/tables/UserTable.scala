@@ -24,4 +24,6 @@ private[models] trait UserTable {
     def * = (id.?, username, name, password) <> ((User.apply _).tupled, User.unapply)
   }
 
+  lazy val users = TableQuery[Users]
+
 }
