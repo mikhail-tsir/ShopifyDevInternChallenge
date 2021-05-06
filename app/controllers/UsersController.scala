@@ -21,7 +21,7 @@ class UsersController @Inject() (
     implicit request: UserRequest[AnyContent] =>
       userDao.find(username).flatMap {
         case Some(user) => Future.successful(Ok(views.html.users(user)))
-        case None => Future.successful(Results.NotFound)
+        case None => Future.successful(NotFound(views.html.notfound()))
       }
   }
 
