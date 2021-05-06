@@ -1,14 +1,28 @@
 name := """image-repository"""
-organization := "repo"
 
-version := "1.0-SNAPSHOT"
+version := "1.0.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.13.5"
 
+val slickVersion     = "3.3.3"
+val playSlickVersion = "5.0.0"
+
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+libraryDependencies += "com.github.jwt-scala"   %% "jwt-core"           % "7.1.4"
+libraryDependencies ++= Seq(
+  "com.typesafe.slick" %% "slick"                 % slickVersion,
+  "com.typesafe.slick" %% "slick-hikaricp"        % slickVersion,
+  "com.typesafe.play"  %% "play-slick"            % playSlickVersion,
+  "com.typesafe.play"  %% "play-slick-evolutions" % playSlickVersion,
+  "org.postgresql"      % "postgresql"            % "9.4-1206-jdbc42",
+  "net.codingwell"     %% "scala-guice"           % "4.2.6",
+  filters
+)
+
+libraryDependencies += "org.mindrot" % "jbcrypt" % "0.4"
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "repo.controllers._"
