@@ -6,9 +6,9 @@
             <div class="columns is-centered">
                 <div class="column has-text-centered">
                     <h1 class="title">@user.name</h1>
-                    <h1 class="subtitle">@@@user.username</h1>
+                    <h1 class="subtitle">@@ @user.username</h1>
                     @if(user.username == request.username) {
-                      This is your own page!
+                        This is your own page!
                     }
                     <form action="@routes.UsersController.logout" method="post">
                         @helper.CSRF.formField

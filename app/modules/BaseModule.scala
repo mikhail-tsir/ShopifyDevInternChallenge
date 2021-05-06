@@ -1,8 +1,8 @@
 package modules
 
 import com.google.inject.AbstractModule
-import models.daos.{ UserDAO, UserDAOImpl }
-import services.{ PasswordHasherService, PasswordHasherServiceImpl }
+import models.daos.{UserDAO, UserDAOImpl}
+import services.{PasswordHasherService, PasswordHasherServiceImpl}
 import net.codingwell.scalaguice.ScalaModule
 
 /**

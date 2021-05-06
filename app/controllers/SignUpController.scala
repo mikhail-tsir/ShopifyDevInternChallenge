@@ -8,7 +8,7 @@ import models.daos.UserDAO
 import play.api.data.Form
 import play.api.mvc._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import services.PasswordHasherService
 
 /**
@@ -16,10 +16,11 @@ import services.PasswordHasherService
  */
 @Singleton
 class SignUpController @Inject() (
-  val cc: MessagesControllerComponents,
-  userDao: UserDAO,
-  passwordHasherService: PasswordHasherService)(implicit ec: ExecutionContext)
-  extends MessagesAbstractController(cc) {
+    val cc: MessagesControllerComponents,
+    userDao: UserDAO,
+    passwordHasherService: PasswordHasherService
+)(implicit ec: ExecutionContext)
+    extends MessagesAbstractController(cc) {
 
   val postUrl: Call = routes.SignUpController.handleSignUp
 
@@ -53,7 +54,8 @@ class SignUpController @Inject() (
                 .save(User(None, username, name, hashedPassword))
                 .map(_ =>
                   Redirect(routes.SignInController.handleSignIn)
-                    .flashing("success" -> s"Welcome, $username!"))
+                    .flashing("success" -> s"Welcome, $username!")
+                )
           }
       }
 
