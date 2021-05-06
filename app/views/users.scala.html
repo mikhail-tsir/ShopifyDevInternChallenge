@@ -2,20 +2,44 @@
 
 @main("@user.username") {
     <section class="section is-primary is-fullheight">
-        <div class="container">
-            <div class="columns is-centered">
-                <div class="column has-text-centered">
-                    <h1 class="title">@user.name</h1>
-                    <h1 class="subtitle">@@ @request.username</h1>
-                    @if(user.username == request.username) {
-                        This is your own page!
-                    }
-                    <form action="@routes.UsersController.logout" method="post">
-                        @helper.CSRF.formField
-                        <button type="submit">Log Out</button>
-                    </form>
-                    @request.session
+        @* <aside class="menu">*@
+        @* <button class="is-link">Add an Album</button>*@
+        @* <button class="is-link">Log Out</button>*@
+        @* </aside>*@
+        <div class="columns">
+            <div class="column is-3 has-text-left">
+                <div class="card has-background-info-light">
+                    <div class="card-image">
+                        <figure class="image is-4by3">
+                            <img src="@routes.Assets.versioned("images/clouds.jpeg")" alt="">
+                        </figure>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-left">
+                                    <figure class="image is-48x48">
+                                        <img src="@routes.Assets.versioned("images/generic-user.jpg")" alt="">
+                                    </figure>
+                                </div>
+                                <div class="media-content">
+                                    <p class="title is-4">@user.name</p>
+                                    <p class="subtitle is-6">@@@user.username</p>
+                                </div>
+                            </div>
+
+                            <div class="content">
+                                <form action="@routes.UsersController.logout" method="post">
+                                    @helper.CSRF.formField
+                                    <input class="button" type="submit" value="Log Out">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="column">
+                <h1 class="title">Second Column</h1>
             </div>
         </div>
     </section>

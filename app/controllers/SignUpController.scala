@@ -30,7 +30,6 @@ class SignUpController @Inject() (
 
   /**
    * Processes user sign up
-   * TODO implement this
    */
   def handleSignUp: Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] =>
