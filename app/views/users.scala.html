@@ -6,7 +6,7 @@
             <div class="columns is-centered">
                 <div class="column has-text-centered">
                     <h1 class="title">@user.name</h1>
-                    <h1 class="subtitle">@@ @user.username</h1>
+                    <h1 class="subtitle">@@ @request.username</h1>
                     @if(user.username == request.username) {
                         This is your own page!
                     }
@@ -14,6 +14,7 @@
                         @helper.CSRF.formField
                         <button type="submit">Log Out</button>
                     </form>
+                    @request.session
                 </div>
             </div>
         </div>

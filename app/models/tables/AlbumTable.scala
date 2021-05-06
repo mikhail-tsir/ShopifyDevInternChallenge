@@ -21,8 +21,11 @@ private[models] trait AlbumTable extends UserTable {
     /** Description column */
     def description = column[String]("description")
 
+    /** Public/private flag column */
+    def is_public = column[Boolean]("is_public")
+
     /** Mapping between table row and Album case class */
-    def * = (id.?, user_id.?, name, description) <> ((Album.apply _).tupled, Album.unapply)
+    def * = (id.?, user_id.?, name, description, is_public) <> ((Album.apply _).tupled, Album.unapply)
 
     /** Foreign key on Users table */
     def owner = foreignKey("owner_fk", user_id, users)(_.id)
