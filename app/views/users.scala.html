@@ -10,6 +10,10 @@
                     @if(user.username == request.username) {
                       This is your own page!
                     }
+                    <form action="@routes.UsersController.logout" method="post">
+                        @helper.CSRF.formField
+                        <button type="submit">Log Out</button>
+                    </form>
                 </div>
             </div>
         </div>

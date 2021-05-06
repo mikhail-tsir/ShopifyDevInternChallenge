@@ -27,4 +27,8 @@ class UsersController @Inject() (
       }
   }
 
+  def logout: Action[AnyContent] = Action {
+    Redirect(routes.SignInController.showSignInPage).withNewSession
+  }
+
 }

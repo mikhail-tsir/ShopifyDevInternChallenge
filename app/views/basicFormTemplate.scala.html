@@ -13,7 +13,9 @@
                 <div class="column is-5-tablet is-4-desktop is-3-widescreen">
                     <div class="card">
                         <div class="card-content">
-
+                            @request.flash.data.map { case (name, value) =>
+                                <div class="help is-danger">@value</div>
+                            }
                             @formBody
 
                             @* Global errors are not tied to any particular form field *@

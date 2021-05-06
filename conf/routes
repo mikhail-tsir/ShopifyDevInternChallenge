@@ -12,6 +12,7 @@ GET     /signIn                     controllers.SignInController.showSignInPage
 POST    /signIn                     controllers.SignInController.handleSignIn
 
 GET     /user/:username             controllers.UsersController.showUser(username)
+POST    /user/logout                controllers.UsersController.logout
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
