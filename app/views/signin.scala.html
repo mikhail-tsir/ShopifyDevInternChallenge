@@ -1,0 +1,22 @@
+@import controllers.forms.SignInForm.UserSignInData
+@import views.formFieldTemplates.FormFieldTemplate._
+
+@(form: Form[UserSignInData], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+@basicFormTemplate(form, postUrl, "Sign In") {
+    @helper.form(postUrl, args = Symbol("class") -> "form is-centered") {
+        @helper.CSRF.formField
+        @helper.inputText(form("Username"))
+        @helper.inputPassword(form("Password"))
+
+        <div class="field">
+            <div class="control">
+                <button class="button is-link">Sign In</button>
+            </div>
+        </div>
+
+        <div class="control">
+            Don't have an account yet? <a href="@routes.SignUpController.showSignUpPage">Sign Up</a>
+        </div>
+    }
+}

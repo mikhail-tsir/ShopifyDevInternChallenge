@@ -1,48 +1,24 @@
 @import controllers.forms.SignUpForm.UserSignUpData
-@import views.formFieldTemplates.InputTextTemplate._
+@import views.formFieldTemplates.FormFieldTemplate._
 
 @(form: Form[UserSignUpData], postUrl: Call)(implicit request: MessagesRequestHeader)
 
-@main("Sign Up") {
-    <section class="section is-primary is-fullheight">
-            <div class="container">
-                <div class="columns is-centered">
-                    <div class="column has-text-centered">
-                        <h1 class="title">Sign Up</h1>
-                    </div>
-                </div>
+@basicFormTemplate(form, postUrl, "Sign Up") {
+    @helper.form(postUrl, args = Symbol("class") -> "form is-centered") {
+        @helper.CSRF.formField
+        @helper.inputText(form("Username"), args = Symbol("placeholder") -> "Username")
+        @helper.inputText(form("Name"), args = Symbol("placeholder") -> "Your Name")
+        @helper.inputPassword(form("Password"))
+        @helper.inputPassword(form("Confirm Password"))
 
-                <div class="columns is-centered">
-                    <div class="column is-5-tablet is-4-desktop is-3-widescreen">
-                        <div class="card">
-                            <div class="card-content">
-
-                                @helper.form(postUrl, args=Symbol("class") -> "form is-centered") {
-                                    @helper.CSRF.formField
-                                    @helper.inputText(form("Username"), args = Symbol("placeholder") -> "Username")
-                                    @helper.inputText(form("Name"), args = Symbol("placeholder") -> "Your Name")
-                                    @helper.inputPassword(form("Password"))
-                                    @helper.inputPassword(form("Confirm Password"))
-
-                                    <div class="field">
-                                        <div class="control">
-                                            <button class="button is-link">Sign Up</button>
-                                        </div>
-                                    </div>
-                                }
-
-                                @* Global errors are not tied to any particular form field *@
-                                @if(form.hasGlobalErrors) {
-                                    @form.globalErrors.map { error: FormError =>
-                                        <div class="help is-danger">
-                                            @error.message
-                                        </div>
-                                    }
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="field">
+            <div class="control">
+                <button class="button is-link">Sign Up</button>
             </div>
-    </section>
+        </div>
+
+        <div class="control">
+            Already have an account? <a href="@routes.SignInController.showSignInPage">Sign In</a>
+        </div>
+    }
 }

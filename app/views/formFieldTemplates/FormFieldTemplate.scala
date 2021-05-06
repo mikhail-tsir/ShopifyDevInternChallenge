@@ -2,7 +2,7 @@ package views.formFieldTemplates
 
 import views.html.helper.FieldConstructor
 
-object InputTextTemplate {
+object FormFieldTemplate {
   implicit val myFields: FieldConstructor = FieldConstructor(
     views.html.formFieldTemplates.formFieldTemplate(_))
 }
