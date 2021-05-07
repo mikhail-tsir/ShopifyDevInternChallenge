@@ -31,4 +31,6 @@ private[models] trait AlbumTable extends UserTable {
     def owner = foreignKey("owner_fk", user_id, users)(_.id)
   }
 
+  lazy val albums = TableQuery[Albums]
+
 }

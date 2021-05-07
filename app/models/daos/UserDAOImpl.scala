@@ -5,15 +5,16 @@ import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.{ ExecutionContext, Future }
 import slick.jdbc.{ JdbcProfile, PostgresProfile }
-import models.User
-import models.tables.UserTable
+import models.{ Album, User }
+import models.tables.{ AlbumTable, UserTable }
 
 /**
  * Data accessor object for Users
  */
 @Singleton
 class UserDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends UserDAO
-  with UserTable {
+  with UserTable
+  with AlbumTable {
 
   protected val driver: JdbcProfile = PostgresProfile
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -33,5 +34,13 @@ class UserDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit 
   override def update(user: User): Future[User] = db.run {
     users.filter(_.username === user.username).update(user).map(_ => user)
   }
+
+  override def getAlbums(user: User): Future[List[Album]] = db.run {
+    albums.filter(_.user_id === user.id).result
+  }.map(_.toList)
+
+  override def getPublicAlbums(user: User): Future[List[Album]] = db.run {
+    albums.filter(album => album.user_id === user.id && album.is_public).result
+  }.map(_.toList)
 
 }

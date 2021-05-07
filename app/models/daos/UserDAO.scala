@@ -1,6 +1,6 @@
 package models.daos
 
-import models.User
+import models.{ Album, User }
 
 import scala.concurrent.Future
 
@@ -29,4 +29,20 @@ trait UserDAO {
    * @return The newly updated user
    */
   def update(user: User): Future[User]
+
+  /**
+   * Returns a list of all albums belonging to that user
+   *
+   * @param user The user whose albums are queried
+   * @return (Possibly empty) List of albums belonging to that user
+   */
+  def getAlbums(user: User): Future[List[Album]]
+
+  /**
+   * Returns a list of all public albums belonging to a given user
+   *
+   * @param user The user whose albums are queried
+   * @return (Possibly empty) List of public albums belonging to that user
+   */
+  def getPublicAlbums(user: User): Future[List[Album]]
 }

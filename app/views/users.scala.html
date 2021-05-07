@@ -1,7 +1,8 @@
 @(
     currentUser: User,
     user: Option[User],
-    searchUserForm: Form[String],
+    searchUserForm: Form[String]
+)(
     body: Html = Html("<div></div>")
 )(implicit request: UserRequest[AnyContent])
 

@@ -19,9 +19,10 @@ class UsersController @Inject() (
   val cc: ControllerComponents,
   userDao: UserDAO,
   authenticatedUserAction: AuthenticatedUserAction,
-  messagesApi: MessagesApi)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext)
   extends AbstractController(cc)
   with I18nSupport {
+
   val searchUserForm: Form[String] = Form(nonEmptyText)
 
   def showUser(username: String): Action[AnyContent] = authenticatedUserAction.async {
@@ -29,11 +30,10 @@ class UsersController @Inject() (
       userDao.find(request.username).flatMap {
         // If the current user exists
         case Some(curUser) =>
-          userDao.find(username).flatMap {
-            userOpt: Option[User] =>
-              Future.successful(
-                Ok(views.html.users(curUser, userOpt, searchUserForm)))
+          userDao.find(username).flatMap { userOpt: Option[User] =>
+            Future.successful(Ok(views.html.users(curUser, userOpt, searchUserForm)()))
           }
+        // If current user doesn't exist for some reason, redirect to custom 404 page
         case _ => Future.successful(NotFound(views.html.notfound()))
       }
   }

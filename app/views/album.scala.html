@@ -1,0 +1,10 @@
+@(album: Album) {
+    <div class="card is-2">
+        <div class="card-header">
+            <h1 class="title">@album.name</h1>
+        </div>
+        <div class="card-contents">
+        @album.capDescription()
+        </div>
+    </div>
+}
