@@ -7,7 +7,7 @@
                 <div class="column has-text-centered">
                     <h1 class="title">Oops! This page doesn't seem to exist :(</h1>
                        @request match {
-                           case UserRequest(username, _) => {<a href="@routes.UsersController.showUser(username)">Go Home</a>}
+                           case UserRequest(user, _) => {<a href="@routes.UsersController.showUser(user.username)">Go Home</a>}
                            case _ => {<a href="@routes.SignInController.showSignInPage">Sign In</a>}
                        }
                 </div>

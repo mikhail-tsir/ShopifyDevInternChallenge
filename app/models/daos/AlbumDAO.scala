@@ -1,9 +1,17 @@
 package models.daos
 
-import models.Album
+import models.{ Album, User }
 import scala.concurrent.Future
 
-trait AlbumDao {
+trait AlbumDAO {
+
+  /**
+   * Finds album by the given id
+   *
+   * @param id The id of the album to find
+   * @return The found album
+   */
+  def find(id: Int): Future[Option[Album]]
 
   /**
    * Saves the given album into the db

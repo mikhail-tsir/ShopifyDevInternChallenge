@@ -45,4 +45,12 @@ trait UserDAO {
    * @return (Possibly empty) List of public albums belonging to that user
    */
   def getPublicAlbums(user: User): Future[List[Album]]
+
+  /**
+   * Returns the owner of the album
+   *
+   * @param album The album whose owner to retrieve
+   * @return The owner of `album`
+   */
+  def getAlbumOwner(album: Album): Future[Option[User]]
 }

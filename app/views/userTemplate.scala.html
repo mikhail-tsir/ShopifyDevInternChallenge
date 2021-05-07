@@ -1,12 +1,9 @@
-@(
-    currentUser: User,
-    user: Option[User],
-    searchUserForm: Form[String]
-)(
-    body: Html = Html("<div></div>")
-)(implicit request: UserRequest[AnyContent])
+@(body: Html)(implicit
+    searchUserForm: Form[String],
+    request: UserRequest[AnyContent]
+)
 
-@main("@user.username") {
+@main() {
     <section class="section is-primary is-fullheight">
         <div class="columns">
             <div class="column is-3 has-text-left">
@@ -24,8 +21,8 @@
                                 </figure>
                             </div>
                             <div class="media-content">
-                                <p class="title is-4">@currentUser.name</p>
-                                <p class="subtitle">@@@currentUser.username</p>
+                                <p class="title is-4">@request.user.name</p>
+                                <p class="subtitle">@@@request.user.username</p>
                             </div>
                         </div>
 
@@ -52,26 +49,7 @@
                     </div>
                 </div>
             </div>
-
-            @user match {
-                case Some(u) => {
-                    <div class="column has-background-light">
-                        <h1 class="title">
-                        @if(u.username == currentUser.username) {
-                            Your Albums
-                        } else {
-                            <b>@@ @u.username</b>'s Albums }
-                        </h1>
-                        @body
-                    </div>
-                }
-                case _ => {
-                    <div class="column has-background-light has-text-centered is-desktop is-vcentered">
-                        <h1 class="subtitle">This user doesn't exist :(</h1>
-                    </div>
-                }
-            }
-            </div>
+            @body
         </div>
     </section>
 }

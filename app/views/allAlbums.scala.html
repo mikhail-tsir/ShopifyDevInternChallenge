@@ -1,0 +1,11 @@
+@(albums: List[Album], owner: User) {
+  @if(albums.empty) {
+    <h1 class="subtitle">
+        This user doesn't have any albums yet.
+    </h1>
+  } else {
+      @albums.map(
+          album(_, owner)
+      )
+  }
+}

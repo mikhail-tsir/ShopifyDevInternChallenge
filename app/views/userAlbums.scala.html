@@ -1,0 +1,16 @@
+@(user: User, albums: List[Album])(implicit request: UserRequest[AnyContent], searchUserForm: Form[String])
+
+@content = {
+    <div class="column has-background-light">
+        <h1 class="title">
+            @if(user.username == request.user.username) {
+                Your Albums
+            } else {
+                <b>@@@user.username</b>'s Albums
+            }
+        </h1>
+        @allAlbums(albums, user)
+    </div>
+}
+
+@userTemplate(content)

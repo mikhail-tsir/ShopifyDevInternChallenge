@@ -1,0 +1,18 @@
+@(album: Album, owner: User)
+
+<div class="card is-full">
+  <div class="card-header">
+    <h1 class="title">@album.name</h1>
+  </div>
+  <div class="card-contents">
+    @album.description
+  </div>
+  <div class="card-footer">
+    <div class="card-footer-item">
+        Back to <a href="@routes.UsersController.showUser(owner.username)">@owner.username's page</a>
+    </div>
+  </div>
+</div>
+
+This album is empty.
+

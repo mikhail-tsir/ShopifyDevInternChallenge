@@ -1,7 +1,7 @@
 package modules
 
 import com.google.inject.AbstractModule
-import models.daos.{ UserDAO, UserDAOImpl }
+import models.daos.{ UserDAO, UserDAOImpl, AlbumDAO, AlbumDAOImpl }
 import services.{ PasswordHasherService, PasswordHasherServiceImpl }
 import net.codingwell.scalaguice.ScalaModule
 
@@ -15,6 +15,7 @@ class BaseModule extends AbstractModule with ScalaModule {
    */
   override def configure(): Unit = {
     bind[UserDAO].to[UserDAOImpl]
+    bind[AlbumDAO].to[AlbumDAOImpl]
     bind[PasswordHasherService].to[PasswordHasherServiceImpl]
   }
 }

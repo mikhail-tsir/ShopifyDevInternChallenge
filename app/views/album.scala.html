@@ -1,7 +1,16 @@
-@(album: Album) {
+@(album: Album, owner: User) {
     <div class="card is-2">
         <div class="card-header">
-            <h1 class="title">@album.name</h1>
+            <h1 class="title">
+            @album.id match {
+                case Some(id) => {
+                    <a href="@routes.UsersController.viewAlbum(id)">@album.name</a>
+                }
+                case None => {
+                    <a href="@views.html.notfound">@album.name</a>
+                }
+            }
+            </h1>
         </div>
         <div class="card-contents">
         @album.capDescription()

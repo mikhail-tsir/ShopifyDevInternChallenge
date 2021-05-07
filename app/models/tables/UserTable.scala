@@ -7,7 +7,7 @@ private[models] trait UserTable {
   protected val driver: JdbcProfile
   import driver.api._
 
-  class Users(tag: Tag) extends Table[User](tag, Some("image_repo"), "users") {
+  class Users(tag: Tag) extends Table[User](tag, Some("image_repo"), "userAlbums") {
 
     /** ID column, auto-incremented primary key */
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
