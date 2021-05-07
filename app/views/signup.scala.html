@@ -3,7 +3,7 @@
 
 @(form: Form[UserSignUpData], postUrl: Call)(implicit request: MessagesRequestHeader)
 
-@basicFormTemplate(form, postUrl, "Sign Up") {
+@centeredForm(form, postUrl, "Sign Up") {
     @helper.form(postUrl, args = Symbol("class") -> "form is-centered") {
         @helper.CSRF.formField
         @helper.inputText(form("Username"), args = Symbol("placeholder") -> "Username")

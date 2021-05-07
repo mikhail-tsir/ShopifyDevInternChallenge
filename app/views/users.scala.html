@@ -1,11 +1,12 @@
-@(user: User)(implicit request: UserRequest[AnyContent])
+@(
+    currentUser: User,
+    user: Option[User],
+    searchUserForm: Form[String],
+    body: Html = Html("<div></div>")
+)(implicit request: UserRequest[AnyContent])
 
 @main("@user.username") {
     <section class="section is-primary is-fullheight">
-        @* <aside class="menu">*@
-        @* <button class="is-link">Add an Album</button>*@
-        @* <button class="is-link">Log Out</button>*@
-        @* </aside>*@
         <div class="columns">
             <div class="column is-3 has-text-left">
                 <div class="card has-background-info-light">
@@ -15,31 +16,60 @@
                         </figure>
                     </div>
                     <div class="card-content">
-                        <div class="card-content">
-                            <div class="media">
-                                <div class="media-left">
-                                    <figure class="image is-48x48">
-                                        <img src="@routes.Assets.versioned("images/generic-user.jpg")" alt="">
-                                    </figure>
-                                </div>
-                                <div class="media-content">
-                                    <p class="title is-4">@user.name</p>
-                                    <p class="subtitle is-6">@@@user.username</p>
-                                </div>
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-48x48">
+                                    <img src="@routes.Assets.versioned("images/generic-user.jpg")" alt="">
+                                </figure>
                             </div>
+                            <div class="media-content">
+                                <p class="title is-4">@currentUser.name</p>
+                                <p class="subtitle">@@@currentUser.username</p>
+                            </div>
+                        </div>
 
-                            <div class="content">
-                                <form action="@routes.UsersController.logout" method="post">
-                                    @helper.CSRF.formField
-                                    <input class="button" type="submit" value="Log Out">
-                                </form>
-                            </div>
+                        <div class="menu">
+                            <ul class="menu-list">
+                                <li style="margin: 10px 0">
+                                    <form method="GET" action="/search">
+                                        <label for="username">
+                                            <input class="input" name="username" id="username" placeholder="Search Username">
+                                        </label>
+                                    </form>
+                                </li>
+                                <li><a class="button">Add an Album</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-footer-item">
+                            <form id="logout" action="@routes.UsersController.logout" method="post">
+                                @helper.CSRF.formField
+                                <a href="javascript:;" onclick="document.getElementById('logout').submit();">Log Out</a>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="column">
-                <h1 class="title">Second Column</h1>
+
+            @user match {
+                case Some(u) => {
+                    <div class="column has-background-light">
+                        <h1 class="title">
+                        @if(u.username == currentUser.username) {
+                            Your Albums
+                        } else {
+                            <b>@@ @u.username</b>'s Albums }
+                        </h1>
+                        @body
+                    </div>
+                }
+                case _ => {
+                    <div class="column has-background-light has-text-centered is-desktop is-vcentered">
+                        <h1 class="subtitle">This user doesn't exist :(</h1>
+                    </div>
+                }
+            }
             </div>
         </div>
     </section>
