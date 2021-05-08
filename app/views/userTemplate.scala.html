@@ -1,6 +1,7 @@
+@import controllers.actions.UserRequest
 @(body: Html)(implicit
-    searchUserForm: Form[String],
-    request: UserRequest[AnyContent]
+        request: UserRequest[_],
+        searchUserForm: Form[String] = controllers.forms.SearchUserForm.searchUserForm,
 )
 
 @main() {
@@ -24,7 +25,7 @@
                                 <p class="title is-4">@request.user.name</p>
                                 <p class="subtitle">
                                     <a href="@routes.UsersController.showUser(request.user.username)">
-                                        @@@request.user.username
+                                    @@@request.user.username
                                     </a>
                                 </p>
                             </div>
@@ -56,7 +57,7 @@
                 </div>
             </div>
             <div class="column has-background-light">
-                @body
+            @body
             </div>
         </div>
     </section>

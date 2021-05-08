@@ -1,4 +1,5 @@
-@(album: Album, owner: User)(implicit request: UserRequest[AnyContent])
+@import controllers.actions.UserRequest
+@(album: Album, owner: User)(implicit request: UserRequest[_])
 
 <div class="column is-3">
     <div class="card">

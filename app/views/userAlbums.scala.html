@@ -1,4 +1,5 @@
-@(user: User, albums: List[Album])(implicit request: UserRequest[AnyContent], searchUserForm: Form[String])
+@import controllers.actions.UserRequest
+@(user: User, albums: List[Album])(implicit request: UserRequest[_], searchUserForm: Form[String])
 
 @content = {
             <h1 class="title has-text-centered">

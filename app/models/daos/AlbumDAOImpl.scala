@@ -1,24 +1,22 @@
 package models.daos
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.db.slick.DatabaseConfigProvider
 
-import scala.concurrent.{ExecutionContext, Future}
-import slick.jdbc.{JdbcProfile, PostgresProfile}
-import models.{Album, User}
+import scala.concurrent.{ ExecutionContext, Future }
+import slick.jdbc.{ JdbcProfile, PostgresProfile }
+import models.{ Album, User }
 import models.tables.AlbumTable
 
 /**
  * Data Accessor Object for Albums, handles all DB interaction
  */
 @Singleton
-class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
-    ec: ExecutionContext
-) extends AlbumDAO
-    with AlbumTable {
+class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends AlbumDAO
+  with AlbumTable {
 
   protected val driver: JdbcProfile = PostgresProfile
-  private val dbConfig              = dbConfigProvider.get[JdbcProfile]
+  private val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   // Brings DB operations into scope
   import dbConfig._

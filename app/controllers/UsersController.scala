@@ -1,15 +1,29 @@
 package controllers
 
+import controllers.actions.{
+  AlbumAction,
+  AlbumOwnerAction,
+  AlbumRequest,
+  AlbumViewerAction,
+  AuthenticatedUserAction,
+  UserRequest
+}
 import controllers.forms.AddAlbumForm.{AddAlbumData, addAlbumForm}
 import controllers.forms.SearchUserForm
-import models.{Album, User}
+import controllers.forms.UploadImageForm.{UploadImageData, uploadImageForm}
+import models.{Album, Image, User}
 import models.daos.{AlbumDAO, UserDAO}
 
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
+import play.api.libs.Files
 import play.api.mvc._
+import services.CloudStorageService
 
+import java.io.File
+import java.nio.file.Paths
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -18,12 +32,24 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class UsersController @Inject() (
     val cc: ControllerComponents,
-    userDao: UserDAO,
-    albumDao: AlbumDAO,
+    cloudStorageService: CloudStorageService,
     authenticatedUserAction: AuthenticatedUserAction
-)(implicit ec: ExecutionContext)
-    extends AbstractController(cc)
+)(implicit
+    ec: ExecutionContext,
+    userDao: UserDAO,
+    albumDao: AlbumDAO
+) extends AbstractController(cc)
     with I18nSupport {
+
+  val authenticatedAlbumViewerAction = (albumId: Int) =>
+    authenticatedUserAction
+      .andThen(AlbumAction(albumId))
+      .andThen(AlbumViewerAction.apply)
+
+  val authenticatedAlbumOwnerAction = (albumId: Int) =>
+    authenticatedUserAction
+      .andThen(AlbumAction(albumId))
+      .andThen(AlbumOwnerAction.apply)
 
   /**
    * Helper functions and declarations
@@ -69,28 +95,21 @@ class UsersController @Inject() (
       }
   }
 
-  // This needs to be in a separate function because the showUser route
-  //  is /user/<username>, but the searchUserForm cannot call that action.
-  //  Instead it calls this route which is /search?username=<username>.
   def search(username: String): Action[AnyContent] = showUser(username)
 
-  def viewAlbum(id: Int): Action[AnyContent] = authenticatedUserAction.async {
-    implicit request: UserRequest[AnyContent] =>
-      albumDao.find(id).flatMap {
-        // Album exists and current user is authorized to view it
-        case Some(album) =>
-          if (request.user.hasAccessTo(album))
-            userDao.getAlbumOwner(album).flatMap {
-              // If the album owner exists
-              case Some(owner) =>
-                Future
-                  .successful(Ok(views.html.userTemplate(views.html.albumContents(album, owner))))
-              // If the Album owner doesn't exist
-              case None => albumNotFoundPage
-            }
-          // User is not authorized to view album
-          else userNotFoundPage
-        // Album does not exist
+  def viewAlbum(id: Int): Action[AnyContent] = authenticatedAlbumViewerAction(id).async {
+    implicit request: AlbumRequest[AnyContent] =>
+      implicit val userRequest: UserRequest[AnyContent] = request.request
+      userDao.getAlbumOwner(request.album).flatMap {
+        case Some(owner) =>
+          Future.successful {
+            Ok(
+              views.html.userTemplate(
+                views.html.albumContents(request.album, owner)
+              )
+            )
+          }
+        // If we can't retrieve the page of the album's owner
         case None => albumNotFoundPage
       }
   }
@@ -116,17 +135,59 @@ class UsersController @Inject() (
       addAlbumForm.bindFromRequest().fold(errorFunction, successFunction)
   }
 
-  def deleteAlbum(id: Int): Action[AnyContent] = authenticatedUserAction.async {
-    implicit request: UserRequest[AnyContent] =>
-      albumDao.find(id).flatMap {
-        case Some(album) if album.user_id == request.user.id =>
-          albumDao.delete(album).flatMap { _ =>
-            renderHomePage
-          }
-        case _ =>
-          Future.successful(Unauthorized("You do not have permission to delete this album."))
+  def deleteAlbum(id: Int): Action[AnyContent] = authenticatedAlbumOwnerAction(id).async {
+    implicit request: AlbumRequest[AnyContent] =>
+      implicit val userRequest: UserRequest[AnyContent] = request.request
+      albumDao.delete(request.album).flatMap { _ =>
+        renderHomePage
       }
   }
+
+  //  def validateFileType(filename: String): Boolean = {
+  //    val allowedExtensions: Set[String] = Set("jpg", "png")
+  //    allowedExtensions.contains(filename.split(".").last)
+  //  }
+  //
+  //  def uploadImage(album: Album): Action[MultipartFormData[_]] = {
+  //    authenticatedUserAction(parse.multipartFormData).async {
+  //      implicit request: UserRequest[MultipartFormData[Files.TemporaryFile]] =>
+  //        val errorFunction = (flashMessage: String) => {
+  //          _: Form[UploadImageData] =>
+  //            Future.successful(
+  //              Redirect(routes.UsersController.showUploadImagePage(album))
+  //                .flashing("error" -> flashMessage)
+  //            )
+  //        }
+  //
+  //        val successFunction = (image: File) => {
+  //          uploadImageData: UploadImageData =>
+  //            val imageModel = Image(None, uploadImageData.caption, album.id, image.getName)
+  //            for {
+  //              id <- cloudStorageService.uploadImage(image)
+  //              _  <- imageDao
+  //            } yield Redirect(
+  //              routes.UsersController.viewAlbum(album.id.getOrElse(-1))
+  //            )
+  //              .flashing("success" -> "Image uploaded successfully!")
+  //        }
+  //
+  //        request.body
+  //          .file("File")
+  //          .map { image =>
+  //            if (validateFileType(image.filename)) {}
+  //            val uuid      = UUID.randomUUID()
+  //            val extension = image.filename.split(".").last
+  //            val tempFile  = new File(s"tmp/$uuid.$extension")
+  //            image.ref.moveTo(tempFile)
+  //
+  //            uploadImageForm.bindFromRequest
+  //              .fold(errorFunction("Error uploading image."), successFunction(tempFile))
+  //          }
+  //          .getOrElse(
+  //            errorFunction("Missing image.")
+  //          )
+  //    }
+  //  }
 
   // Log out action
   def logout: Action[AnyContent] = Action {

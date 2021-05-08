@@ -17,11 +17,18 @@ case class User(id: Option[Int], username: String, name: String, password: Strin
   /**
    * Check if user is authorized to access the given album
    *
-   * @param album The album to check authorization against
+   * @param album The album to check view permission against
    * @return true if authorized, false otherwise
    */
-  def hasAccessTo(album: Album): Boolean = album.isPublic || album.user_id == id
+  def canView(album: Album): Boolean = album.isPublic || (id.isDefined && id == album.user_id)
 
+  /**
+   * Check if user is authorized to delete given album (or an image in it)
+   *
+   * @param album The album to check delete permission against
+   * @return true if authorized, false otherwise
+   */
+  def canDelete(album: Album): Boolean = id.isDefined && id == album.user_id
 }
 
 object User {

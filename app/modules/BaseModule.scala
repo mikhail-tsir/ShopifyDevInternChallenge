@@ -1,8 +1,13 @@
 package modules
 
 import com.google.inject.AbstractModule
-import models.daos.{ UserDAO, UserDAOImpl, AlbumDAO, AlbumDAOImpl }
-import services.{ PasswordHasherService, PasswordHasherServiceImpl }
+import models.daos.{AlbumDAO, AlbumDAOImpl, UserDAO, UserDAOImpl}
+import services.{
+  AWSCloudStorageImpl,
+  CloudStorageService,
+  PasswordHasherService,
+  PasswordHasherServiceImpl
+}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -17,5 +22,6 @@ class BaseModule extends AbstractModule with ScalaModule {
     bind[UserDAO].to[UserDAOImpl]
     bind[AlbumDAO].to[AlbumDAOImpl]
     bind[PasswordHasherService].to[PasswordHasherServiceImpl]
+    bind[CloudStorageService].to[AWSCloudStorageImpl]
   }
 }

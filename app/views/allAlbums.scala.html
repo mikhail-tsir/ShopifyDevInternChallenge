@@ -1,4 +1,5 @@
-@(albums: List[Album], owner: User)(implicit request: UserRequest[AnyContent])
+@import controllers.actions.UserRequest
+@(albums: List[Album], owner: User)(implicit request: UserRequest[_])
   @if(albums.isEmpty) {
     <h1 class="subtitle">
         This user doesn't have any albums yet.

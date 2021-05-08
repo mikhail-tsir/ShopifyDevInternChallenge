@@ -1,4 +1,5 @@
-@()(implicit request: Request[AnyContent])
+@import controllers.actions.UserRequest
+@()(implicit request: Request[_])
 
 @main("404: Not Found") {
     <section class="section is-primary is-fullheight">

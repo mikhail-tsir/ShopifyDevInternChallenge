@@ -22,7 +22,9 @@ libraryDependencies ++= Seq(
   filters
 )
 
-libraryDependencies += "org.mindrot" % "jbcrypt" % "0.4"
+libraryDependencies += "org.mindrot"                   % "jbcrypt"              % "0.4"
+libraryDependencies += "software.amazon.awssdk"        % "s3"                   % "2.16.58"
+libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.12.2"
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "repo.controllers._"

@@ -1,7 +1,7 @@
 @import controllers.forms.SignUpForm.UserSignUpData
 @import views.formFieldTemplates.FormFieldTemplate._
 
-@(form: Form[UserSignUpData], postUrl: Call)(implicit request: MessagesRequestHeader)
+@(form: Form[UserSignUpData], postUrl: Call)(implicit request: Request[_], messagesProvider: MessagesProvider)
 
 @centeredForm(form, postUrl, "Sign Up") {
     @helper.form(postUrl, args = Symbol("class") -> "form is-centered") {
