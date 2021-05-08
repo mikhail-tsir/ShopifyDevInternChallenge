@@ -20,4 +20,11 @@ trait AlbumDAO {
    * @return The saved album
    */
   def save(album: Album): Future[Album]
+
+  /**
+   * Deletes the given album
+   * @param album The album to delete
+   * @return The deleted album if deletion successful or None otherwise
+   */
+  def delete(album: Album): Future[Option[Album]]
 }

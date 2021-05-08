@@ -17,8 +17,7 @@ case class Album(
   def capDescription(numWords: Int = 30): String = {
     val words = description.split(" ")
     if (words.length <= numWords) description
-    else words.take(numWords) +: "..." mkString " "
-
+    else words.take(numWords) :+ "..." mkString " "
   }
 }
 

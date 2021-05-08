@@ -40,18 +40,14 @@ class UserDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit 
   }
 
   override def getAlbums(user: User): Future[List[Album]] =
-    db
-      .run {
-        albums.filter(_.user_id === user.id).result
-      }
-      .map(_.toList)
+    db.run {
+      albums.filter(_.user_id === user.id).result
+    }.map(_.toList)
 
   override def getPublicAlbums(user: User): Future[List[Album]] =
-    db
-      .run {
-        albums.filter(album => album.user_id === user.id && album.is_public).result
-      }
-      .map(_.toList)
+    db.run {
+      albums.filter(album => album.user_id === user.id && album.is_public).result
+    }.map(_.toList)
 
   override def getAlbumOwner(album: Album): Future[Option[User]] = album.user_id.fold {
     Future.successful(Option.empty[User])

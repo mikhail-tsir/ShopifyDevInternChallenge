@@ -13,6 +13,7 @@ import scala.concurrent.Future
  * @param password User's password
  */
 case class User(id: Option[Int], username: String, name: String, password: String) {
+
   /**
    * Check if user is authorized to access the given album
    *

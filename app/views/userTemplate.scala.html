@@ -22,7 +22,11 @@
                             </div>
                             <div class="media-content">
                                 <p class="title is-4">@request.user.name</p>
-                                <p class="subtitle">@@@request.user.username</p>
+                                <p class="subtitle">
+                                    <a href="@routes.UsersController.showUser(request.user.username)">
+                                        @@@request.user.username
+                                    </a>
+                                </p>
                             </div>
                         </div>
 
@@ -35,7 +39,9 @@
                                         </label>
                                     </form>
                                 </li>
-                                <li><a class="button">Add an Album</a></li>
+                                <li>
+                                    <a class="button" href="@routes.UsersController.showAddAlbumPage">Add an Album</a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -49,7 +55,9 @@
                     </div>
                 </div>
             </div>
-            @body
+            <div class="column has-background-light">
+                @body
+            </div>
         </div>
     </section>
 }

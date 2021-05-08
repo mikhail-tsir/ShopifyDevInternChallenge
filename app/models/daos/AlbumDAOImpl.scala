@@ -1,22 +1,24 @@
 package models.daos
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
 
-import scala.concurrent.{ ExecutionContext, Future }
-import slick.jdbc.{ JdbcProfile, PostgresProfile }
-import models.{ Album, User }
+import scala.concurrent.{ExecutionContext, Future}
+import slick.jdbc.{JdbcProfile, PostgresProfile}
+import models.{Album, User}
 import models.tables.AlbumTable
 
 /**
  * Data Accessor Object for Albums, handles all DB interaction
  */
 @Singleton
-class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends AlbumDAO
-  with AlbumTable {
+class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
+    ec: ExecutionContext
+) extends AlbumDAO
+    with AlbumTable {
 
   protected val driver: JdbcProfile = PostgresProfile
-  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+  private val dbConfig              = dbConfigProvider.get[JdbcProfile]
 
   // Brings DB operations into scope
   import dbConfig._
@@ -30,6 +32,16 @@ class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
   // Saves the given album into the db
   override def save(album: Album): Future[Album] = db.run {
     albums returning albums += album
+  }
+
+  override def delete(album: Album): Future[Option[Album]] = album.id match {
+    case Some(id) =>
+      val query = albums.filter(_.id === id)
+      db.run(query.delete).flatMap {
+        case 0 => Future.successful(None)
+        case _ => Future.successful(Some(album))
+      }
+    case _ => Future.successful(None)
   }
 
 }

@@ -1,0 +1,19 @@
+@import controllers.forms.AddAlbumForm.AddAlbumData
+@import views.formFieldTemplates.FormFieldTemplate._
+
+@(form: Form[AddAlbumData], postUrl: Call)(implicit request: UserRequest[AnyContent])
+
+@centeredForm(form, postUrl, "Add Album") {
+    @helper.form(postUrl, args = Symbol("class") -> "form is-centered") {
+        @helper.CSRF.formField
+        @helper.inputText(form("Name of Album"))
+        @helper.textarea(form("Description"))
+        @helper.checkbox(form("public"), Symbol("label") -> "Make this album public?")
+
+        <div class="field">
+            <div class="control">
+                <button class="button is-link">Add Album</button>
+            </div>
+        </div>
+    }
+}

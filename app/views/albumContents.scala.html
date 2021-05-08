@@ -1,15 +1,26 @@
-@(album: Album, owner: User)
+@(album: Album, owner: User)(implicit request: UserRequest[AnyContent])
 
 <div class="card is-full">
   <div class="card-header">
-    <h1 class="title">@album.name</h1>
+    <div class="card-header-title">
+      <h1 class="title">
+        @album.name
+      </h1>
+    </div>
   </div>
-  <div class="card-contents">
+  <div class="card-content">
     @album.description
   </div>
   <div class="card-footer">
     <div class="card-footer-item">
-        Back to <a href="@routes.UsersController.showUser(owner.username)">@owner.username's page</a>
+      <form id="delete" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(-1))" method="post">
+        @helper.CSRF.formField
+        <a href="javascript:;" onclick="document.getElementById('delete').submit();">Delete Album</a>
+      </form>
+    </div>
+    <div class="card-footer-item">
+        Back to &nbsp;
+          <a href="@routes.UsersController.showUser(owner.username)"> @owner.username's page</a>
     </div>
   </div>
 </div>
