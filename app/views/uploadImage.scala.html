@@ -1,0 +1,21 @@
+@import controllers.actions.AlbumRequest
+@import controllers.forms.UploadImageForm._
+
+@(form: Form[UploadImageData] = uploadImageForm, postUrl: Call)(implicit
+        request: AlbumRequest[_],
+        messagesProvider: MessagesProvider
+)
+
+@centeredForm(form, postUrl, "Upload Image") {
+    @helper.form(action = postUrl, Symbol("enctype") -> "multipart/form-data") {
+        @helper.CSRF.formField
+        @helper.inputFile(form("File"))
+        @helper.textarea(form("Caption"))
+
+        <div class="field">
+            <div class="control">
+                <button class="button is-link">Upload</button>
+            </div>
+        </div>
+    }
+}

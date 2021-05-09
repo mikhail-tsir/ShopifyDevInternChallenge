@@ -2,5 +2,6 @@
 <project version="4">
   <component name="ScalaProjectSettings">
     <option name="ivy2IndexingMode" value="Disabled" />
+    <option name="typeMismatchHints" value="false" />
   </component>
 </project>

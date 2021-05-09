@@ -1,0 +1,30 @@
+@import controllers.actions.UserRequest
+@(image: Image, base64: String, album: Album)(implicit request: UserRequest[_])
+
+<div class="column is-3">
+    <div class="card">
+        <div class="card-image">
+            <figure class="image">
+                <img id="img_@image.id.getOrElse(-1)" src="data:image/jpg;base64,@base64" alt="@base64">
+            </figure>
+        </div>
+        <div class="card-content">
+            <div class="content">
+                @image.caption
+            </div>
+        </div>
+      @if(request.user.id == album.user_id) {
+          <div class="card-footer">
+              <div class="card-footer-item">
+                  <a
+                    id="delete_@image.id.getOrElse(-1)"
+                    href="javascript:;"
+                    data-url='@routes.UsersController.deleteImageRoute(album.id.getOrElse(-1) + "/" + image.id.getOrElse(-1) + "/delete")'
+                    data-redirect-url="@routes.UsersController.viewAlbum(album.id.getOrElse(-1))"
+                    onclick="deleteImage(@album.id.getOrElse(-1), @image.id.getOrElse(-1))"
+                  >Delete</a>
+              </div>
+          </div>
+      }
+    </div>
+</div>

@@ -21,7 +21,14 @@ POST        /addAlbum               controllers.UsersController.handleAddAlbum
 
 POST        /deleteAlbum/:id        controllers.UsersController.deleteAlbum(id: Int)
 
+GET         /album/*suffix          controllers.UsersController.showUploadImagePageRoute(suffix: String)
+POST        /album/*suffix          controllers.UsersController.handleUploadImageRoute(suffix: String)
+
+DELETE      /album/*suffix          controllers.UsersController.deleteImageRoute(suffix: String)
+
 GET         /search                 controllers.UsersController.search(username: String)
+
+GET         /invalid                controllers.UsersController.invalidRoute
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file           controllers.Assets.versioned(path="/public", file: Asset)

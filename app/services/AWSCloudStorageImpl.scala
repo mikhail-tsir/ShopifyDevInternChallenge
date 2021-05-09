@@ -3,16 +3,18 @@ package services
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import services.CloudStorageService
+import software.amazon.awssdk.core.ResponseInputStream
 import software.amazon.awssdk.core.waiters.WaiterResponse
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable
-import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.core.sync.{RequestBody, ResponseTransformer}
 import software.amazon.awssdk.services.s3.waiters.S3Waiter
 import software.amazon.awssdk.services.s3.model._
 
 import java.io.File
 import java.nio.file.Path
+import java.util.Base64
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -30,17 +32,25 @@ class AWSCloudStorageImpl @Inject() (implicit config: Configuration, ec: Executi
     .region(region)
     .build()
 
-  override def uploadImage(file: File): Future[Int] = {
-    val key: String = file.getName
+  override def uploadImage(file: File, key: String): Future[Unit] = Future {
     val objectRequest: PutObjectRequest = PutObjectRequest
       .builder()
       .bucket(bucketName)
       .key(key)
       .build()
 
-    //s3.putObject(objectRequest, RequestBody.fromFile())
-    Future { 0 }
+    s3.putObject(objectRequest, RequestBody.fromFile(file))
+  }
 
+  override def getBase64Encoding(filename: String): String = {
+    val objectRequest: GetObjectRequest = GetObjectRequest
+      .builder()
+      .bucket(bucketName)
+      .key(filename)
+      .build()
+
+    val imgObjectBytes = s3.getObjectAsBytes(objectRequest).asByteArray()
+    Base64.getEncoder.encodeToString(imgObjectBytes)
   }
 
 }

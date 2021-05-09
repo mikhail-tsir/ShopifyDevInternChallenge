@@ -1,5 +1,6 @@
 -- !Ups
-CREATE TABLE images
+
+CREATE TABLE image_repo.images
 (
     id SERIAL NOT NULL PRIMARY KEY,
     caption TEXT NOT NULL,
@@ -9,4 +10,5 @@ CREATE TABLE images
 );
 
 -- !Downs
-DROP TABLE images;
+
+DROP TABLE image_repo.images;

@@ -1,7 +1,7 @@
 package modules
 
 import com.google.inject.AbstractModule
-import models.daos.{AlbumDAO, AlbumDAOImpl, UserDAO, UserDAOImpl}
+import models.daos.{AlbumDAO, AlbumDAOImpl, ImageDAO, ImageDAOImpl, UserDAO, UserDAOImpl}
 import services.{
   AWSCloudStorageImpl,
   CloudStorageService,
@@ -21,6 +21,7 @@ class BaseModule extends AbstractModule with ScalaModule {
   override def configure(): Unit = {
     bind[UserDAO].to[UserDAOImpl]
     bind[AlbumDAO].to[AlbumDAOImpl]
+    bind[ImageDAO].to[ImageDAOImpl]
     bind[PasswordHasherService].to[PasswordHasherServiceImpl]
     bind[CloudStorageService].to[AWSCloudStorageImpl]
   }

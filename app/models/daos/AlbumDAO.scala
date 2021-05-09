@@ -1,6 +1,6 @@
 package models.daos
 
-import models.{ Album, User }
+import models.{Album, User}
 import scala.concurrent.Future
 
 trait AlbumDAO {
@@ -23,8 +23,9 @@ trait AlbumDAO {
 
   /**
    * Deletes the given album
-   * @param album The album to delete
+   *
+   * @param id The id of the album to delete
    * @return The deleted album if deletion successful or None otherwise
    */
-  def delete(album: Album): Future[Option[Album]]
+  def delete(id: Int): Future[Option[Album]]
 }

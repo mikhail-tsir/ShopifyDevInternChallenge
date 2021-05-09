@@ -1,28 +1,22 @@
 package controllers
 
-import controllers.actions.{
-  AlbumAction,
-  AlbumOwnerAction,
-  AlbumRequest,
-  AlbumViewerAction,
-  AuthenticatedUserAction,
-  UserRequest
-}
+import controllers.actions._
 import controllers.forms.AddAlbumForm.{AddAlbumData, addAlbumForm}
 import controllers.forms.SearchUserForm
 import controllers.forms.UploadImageForm.{UploadImageData, uploadImageForm}
 import models.{Album, Image, User}
-import models.daos.{AlbumDAO, UserDAO}
+import models.daos._
 
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.libs.Files
+import play.api.libs.Files.TemporaryFile.temporaryFileToFile
+import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import services.CloudStorageService
 
 import java.io.File
-import java.nio.file.Paths
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,7 +31,8 @@ class UsersController @Inject() (
 )(implicit
     ec: ExecutionContext,
     userDao: UserDAO,
-    albumDao: AlbumDAO
+    albumDao: AlbumDAO,
+    imageDao: ImageDAO
 ) extends AbstractController(cc)
     with I18nSupport {
 
@@ -59,6 +54,9 @@ class UsersController @Inject() (
 
   val addAlbumUrl: Call = routes.UsersController.handleAddAlbum
 
+  def uploadImageUrl(album: Album): Call =
+    routes.UsersController.handleUploadImageRoute(s"${album.id.getOrElse(-1)}/upload")
+
   def userNotFoundPage(implicit request: UserRequest[AnyContent]): Future[Result] = {
     Future.successful(NotFound(views.html.userNotFound()))
   }
@@ -72,6 +70,17 @@ class UsersController @Inject() (
       Redirect(routes.UsersController.showUser(request.user.username), SEE_OTHER)
     }
   }
+
+  def invalidRoute = Action { _ =>
+    BadRequest("Invalid route.")
+  }
+
+  def invalidRouteAuth =
+    authenticatedUserAction(parse.multipartFormData).async { _ =>
+      Future.successful {
+        Redirect(routes.UsersController.invalidRoute)
+      }
+    }
 
   /**
    * Application route actions
@@ -100,17 +109,26 @@ class UsersController @Inject() (
   def viewAlbum(id: Int): Action[AnyContent] = authenticatedAlbumViewerAction(id).async {
     implicit request: AlbumRequest[AnyContent] =>
       implicit val userRequest: UserRequest[AnyContent] = request.request
-      userDao.getAlbumOwner(request.album).flatMap {
-        case Some(owner) =>
-          Future.successful {
-            Ok(
-              views.html.userTemplate(
-                views.html.albumContents(request.album, owner)
-              )
-            )
+      (
+        for {
+          owner  <- userDao.getAlbumOwner(request.album)
+          images <- imageDao.getImages(request.album) if owner.isDefined
+        } yield {
+          val imgList: List[(Image, String)] = images.map { img =>
+            (img, cloudStorageService.getBase64Encoding(img.location))
           }
-        // If we can't retrieve the page of the album's owner
-        case None => albumNotFoundPage
+          owner match {
+            case Some(o) =>
+              Ok(
+                views.html.userTemplate(
+                  views.html.albumContents(request.album, o, imgList)
+                )
+              )
+            case None => NotFound(views.html.albumNotFound())
+          }
+        }
+      ).recover { case e: Exception =>
+        Ok(views.html.albumError())
       }
   }
 
@@ -138,56 +156,132 @@ class UsersController @Inject() (
   def deleteAlbum(id: Int): Action[AnyContent] = authenticatedAlbumOwnerAction(id).async {
     implicit request: AlbumRequest[AnyContent] =>
       implicit val userRequest: UserRequest[AnyContent] = request.request
-      albumDao.delete(request.album).flatMap { _ =>
+      albumDao.delete(id).flatMap { _ =>
         renderHomePage
       }
   }
 
-  //  def validateFileType(filename: String): Boolean = {
-  //    val allowedExtensions: Set[String] = Set("jpg", "png")
-  //    allowedExtensions.contains(filename.split(".").last)
-  //  }
-  //
-  //  def uploadImage(album: Album): Action[MultipartFormData[_]] = {
-  //    authenticatedUserAction(parse.multipartFormData).async {
-  //      implicit request: UserRequest[MultipartFormData[Files.TemporaryFile]] =>
-  //        val errorFunction = (flashMessage: String) => {
-  //          _: Form[UploadImageData] =>
-  //            Future.successful(
-  //              Redirect(routes.UsersController.showUploadImagePage(album))
-  //                .flashing("error" -> flashMessage)
-  //            )
-  //        }
-  //
-  //        val successFunction = (image: File) => {
-  //          uploadImageData: UploadImageData =>
-  //            val imageModel = Image(None, uploadImageData.caption, album.id, image.getName)
-  //            for {
-  //              id <- cloudStorageService.uploadImage(image)
-  //              _  <- imageDao
-  //            } yield Redirect(
-  //              routes.UsersController.viewAlbum(album.id.getOrElse(-1))
-  //            )
-  //              .flashing("success" -> "Image uploaded successfully!")
-  //        }
-  //
-  //        request.body
-  //          .file("File")
-  //          .map { image =>
-  //            if (validateFileType(image.filename)) {}
-  //            val uuid      = UUID.randomUUID()
-  //            val extension = image.filename.split(".").last
-  //            val tempFile  = new File(s"tmp/$uuid.$extension")
-  //            image.ref.moveTo(tempFile)
-  //
-  //            uploadImageForm.bindFromRequest
-  //              .fold(errorFunction("Error uploading image."), successFunction(tempFile))
-  //          }
-  //          .getOrElse(
-  //            errorFunction("Missing image.")
-  //          )
-  //    }
-  //  }
+  def validateFileType(filename: String): Boolean = {
+    val allowedExtensions: Set[String] = Set("jpg", "png")
+    allowedExtensions.contains(filename.split("\\.").toList.last)
+  }
+
+  /**
+   * Validates the route suffix for uploading image
+   *
+   * @param suffix The route suffix
+   * @return The id of the object or None if suffix is invalid
+   */
+  def validateUploadImageRoute(suffix: String): Option[Int] = {
+    val components = suffix.split("/").toList
+    val isValid: Boolean = components.length == 2 &&
+      components.head.toIntOption.isDefined && (
+        components(1) == "upload" ||
+          components(1) == "upload/"
+      )
+
+    if (isValid) components.head.toIntOption else None
+  }
+
+  def showUploadImagePageRoute(suffix: String) =
+    validateUploadImageRoute(suffix) match {
+      case Some(id) => showUploadImagePage(id)
+      case _        => invalidRoute
+    }
+
+  def showUploadImagePage(albumId: Int) = authenticatedAlbumOwnerAction(albumId) {
+    implicit request: AlbumRequest[AnyContent] =>
+      Ok(views.html.uploadImage(postUrl = uploadImageUrl(request.album)))
+  }
+
+  def handleUploadImageRoute(suffix: String) = {
+    validateUploadImageRoute(suffix) match {
+      case Some(id) => handleUploadImage(id)
+      case _        => invalidRouteAuth
+    }
+  }
+
+  def handleUploadImage(albumId: Int) = {
+    authenticatedAlbumOwnerAction(albumId)(parse.multipartFormData).async { implicit request =>
+      val album = request.album
+      val errorFunction: String => Form[UploadImageData] => Future[Result] =
+        (flashMessage: String) =>
+          _ =>
+            Future.successful(
+              Redirect(routes.UsersController.showUploadImagePageRoute(s"$albumId/upload"))
+                .flashing("error" -> flashMessage)
+            )
+
+      val successFunction: (File, String) => UploadImageData => Future[Result] =
+        (image, extension) => {
+          uploadImageData: UploadImageData =>
+            val filename   = UUID.randomUUID().toString + "." + extension
+            val imageModel = Image(None, uploadImageData.caption, album.id, filename)
+            (
+              for {
+                _ <- cloudStorageService.uploadImage(image, filename)
+                _ <- imageDao.save(imageModel)
+              } yield {
+                Redirect(
+                  routes.UsersController.viewAlbum(album.id.getOrElse(-1))
+                ).flashing("success" -> "Image uploaded successfully!")
+              }
+            ).recover { case _: Exception =>
+              Redirect(
+                routes.UsersController.viewAlbum(album.id.getOrElse(-1))
+              ).flashing("error" -> "There was an error uploading your image.")
+            }
+        }
+
+      request.body
+        .file("File")
+        .map { image =>
+          if (validateFileType(image.filename)) {
+            val extension = image.filename.split("\\.").last
+            uploadImageForm
+              .bindFromRequest()
+              .fold(
+                errorFunction("Error uploading image."),
+                successFunction(temporaryFileToFile(image.ref), extension)
+              )
+          } else
+            errorFunction("Invalid file type (must be .jpg or .png).")(uploadImageForm)
+        }
+        .getOrElse(
+          errorFunction("Missing image.")(uploadImageForm)
+        )
+    }
+  }
+
+  def deleteImageRoute(suffix: String) = {
+    println("DELETING IMAGE")
+    val components = suffix.split("/").toList
+    val isValid: Boolean = components.length == 3 &&
+      components.head.toIntOption.isDefined &&
+      components(1).toIntOption.isDefined && (
+        components(2) == "delete" ||
+          components(2) == "delete/"
+      )
+
+    if (isValid) (components.head.toIntOption, components(1).toIntOption) match {
+      case (Some(albumId), Some(imageId)) => handleDeleteImage(albumId, imageId)
+      case _ => {
+        println("INVALID ROUTE 1")
+        invalidRoute
+      }
+    }
+    else {
+      println("INVALID ROUTE 2")
+      invalidRoute
+    }
+  }
+
+  def handleDeleteImage(albumId: Int, imageId: Int) =
+    authenticatedAlbumOwnerAction(albumId).async { _ =>
+      imageDao.delete(imageId).map { _ =>
+        Redirect(routes.UsersController.viewAlbum(albumId))
+      }
+    }
 
   // Log out action
   def logout: Action[AnyContent] = Action {

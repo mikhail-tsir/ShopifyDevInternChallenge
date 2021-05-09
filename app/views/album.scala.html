@@ -6,25 +6,30 @@
         <div class="card-header">
             <h1 class="card-header-title">
                 @album.id match {
-                    case Some(id) => { <a href="@routes.UsersController.viewAlbum(id)">@album.name</a> }
-                    case None => { <a href="@views.html.notfound">@album.name</a> }
+                    case Some(id) => {
+                        <a href="@routes.UsersController.viewAlbum(id)">@album.name</a>
+                    }
+                    case None => {
+                        <a href="@views.html.notfound">@album.name</a>
+                    }
                 }
             </h1>
         </div>
         <div class="card-content">
             <div class="content">
-                @album.capDescription()
+            @album.capDescription()
             </div>
         </div>
         @if(request.user.username == owner.username) {
-          <div class="card-footer">
-              <div class="card-footer-item">
-                  <form id="delete_@album.id.getOrElse(0)" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(0))" method="post">
-                      @helper.CSRF.formField
-                      <a href="javascript:;" onclick="document.getElementById('delete_@album.id.getOrElse(0)').submit();">Delete Album</a>
-                  </form>
-              </div>
-          </div>
+            <div class="card-footer">
+                <div class="card-footer-item">
+                    <form id="delete_@album.id.getOrElse(0)" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(0))" method="post">
+                        @helper.CSRF.formField
+                        <a href="javascript:;" onclick="document.getElementById('delete_@album.id.getOrElse(0)').submit();">
+                            Delete Album</a>
+                    </form>
+                </div>
+            </div>
         }
     </div>
 </div>

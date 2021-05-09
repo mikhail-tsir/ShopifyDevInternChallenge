@@ -1,0 +1,8 @@
+@import controllers.actions.UserRequest
+@()(implicit request: UserRequest[_])
+
+@userTemplate {
+    <div class="column has-background-light has-text-centered is-desktop is-vcentered">
+        <h1 class="subtitle">Oops! We're having trouble loading this Album :(</h1>
+    </div>
+}
