@@ -5,6 +5,25 @@
 )
 
 @main() {
+    <script type="text/javascript">
+            function deleteAlbum(albumId, userId) {
+                $.ajax({
+                    url: jsRoutes.controllers.UsersController.deleteAlbum(albumId).url,
+                    method: "DELETE",
+                    headers: {
+                        "Csrf-Token": "@helper.CSRF.getToken.value"
+                    },
+                    success: function () {
+                        console.log("SUCCESS")
+                        window.location = jsRoutes.controllers.UsersController.showUser(userId).url;
+                    },
+                    error: function () {
+                        console.log("ERROR")
+                        window.location.reload();
+                    }
+                });
+            }
+    </script>
     <section class="section is-primary is-fullheight">
         <div class="columns">
             <div class="column is-3 has-text-left">

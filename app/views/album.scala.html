@@ -23,11 +23,8 @@
         @if(request.user.username == owner.username) {
             <div class="card-footer">
                 <div class="card-footer-item">
-                    <form id="delete_@album.id.getOrElse(0)" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(0))" method="post">
-                        @helper.CSRF.formField
-                        <a href="javascript:;" onclick="document.getElementById('delete_@album.id.getOrElse(0)').submit();">
-                            Delete Album</a>
-                    </form>
+                    <a href="javascript:;" onclick="deleteAlbum(@album.id.getOrElse(-1), @owner.username)">
+                        Delete Album</a>
                 </div>
             </div>
         }

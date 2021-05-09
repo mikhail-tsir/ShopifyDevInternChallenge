@@ -1,11 +1,6 @@
 @import controllers.actions.UserRequest
 @(album: Album, owner: User, imgList: List[(Image, String)])(implicit request: UserRequest[_])
 
-    @helper.javascriptRouter("jsRoutes")(
-        routes.javascript.UsersController.deleteImageRoute,
-        routes.javascript.UsersController.viewAlbum
-    )
-
     <script type="text/javascript">
             function deleteImage(albumId, imageId) {
                 $.ajax({
@@ -38,14 +33,14 @@
         </div>
         <div class="card-footer">
             <div class="card-footer-item">
-              <a href="@routes.UsersController.showUploadImagePageRoute(s"${album.id.getOrElse(-1)}/upload")">Upload Image</a>
+                <a href="@routes.UsersController.showUploadImagePageRoute(s"${album.id.getOrElse(-1)}/upload")">Upload Image</a>
             </div>
-            <div class="card-footer-item">
-                <form id="delete" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(-1))" method="post">
-                    @helper.CSRF.formField
-                <a href="javascript:;" onclick="document.getElementById('delete').submit();">Delete Album</a>
-                </form>
-            </div>
+            @if(owner.username == request.user.username) {
+                <div class="card-footer-item">
+                    <a href="javascript:;" onclick="deleteAlbum(@album.id.getOrElse(-1), @owner.username)">
+                        Delete Album</a>
+                </div>
+            }
             <div class="card-footer-item">
           Back to &nbsp;
                 <a href="@routes.UsersController.showUser(owner.username)"> @owner.username's page</a>
@@ -62,15 +57,15 @@
         }
     }
     <br></br>
-  <div class="columns is-multiline">
-      @if(imgList.isEmpty) {
-          This album is empty.
-      } else {
-          @imgList.map {
-              case (img, base64) => {
-                  @image(img, base64, album)
-              }
-          }
-      }
-  </div>
+    <div class="columns is-multiline">
+    @if(imgList.isEmpty) {
+        This album is empty.
+    } else {
+        @imgList.map {
+            case (img, base64) => {
+                @image(img, base64, album)
+            }
+        }
+    }
+    </div>
 

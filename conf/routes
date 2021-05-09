@@ -19,7 +19,7 @@ GET         /album/:id             controllers.UsersController.viewAlbum(id: Int
 GET         /addAlbum               controllers.UsersController.showAddAlbumPage
 POST        /addAlbum               controllers.UsersController.handleAddAlbum
 
-POST        /deleteAlbum/:id        controllers.UsersController.deleteAlbum(id: Int)
+DELETE        /deleteAlbum/:id        controllers.UsersController.deleteAlbum(id: Int)
 
 GET         /album/*suffix          controllers.UsersController.showUploadImagePageRoute(suffix: String)
 POST        /album/*suffix          controllers.UsersController.handleUploadImageRoute(suffix: String)

@@ -40,9 +40,9 @@ class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
     val foundAlbum  = albums.filter(_.id === id)
     val foundImages = images.filter(_.album_id === id)
     val action = for {
+      _       <- foundImages.delete
       results <- foundAlbum.result
       _       <- foundAlbum.delete
-      _       <- foundImages.delete
     } yield results.headOption
 
     db.run(action)

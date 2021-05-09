@@ -4,7 +4,7 @@
 * two arguments, a `String` for the title of the page and an `Html`
 * object to insert into the body of the page.
 *@
-@(title: String = "Image Repository")(content: Html)
+@(title: String = "Image Repository")(content: Html)(implicit request: Request[_])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +17,12 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
     </head>
     <body>
+        @helper.javascriptRouter("jsRoutes")(
+            routes.javascript.UsersController.deleteImageRoute,
+            routes.javascript.UsersController.viewAlbum,
+            routes.javascript.UsersController.deleteAlbum,
+            routes.javascript.UsersController.showUser
+        )
         @* And here's where we render the `Html` object containing
         * the page content. *@
         @content

@@ -19,8 +19,6 @@
                   <a
                     id="delete_@image.id.getOrElse(-1)"
                     href="javascript:;"
-                    data-url='@routes.UsersController.deleteImageRoute(album.id.getOrElse(-1) + "/" + image.id.getOrElse(-1) + "/delete")'
-                    data-redirect-url="@routes.UsersController.viewAlbum(album.id.getOrElse(-1))"
                     onclick="deleteImage(@album.id.getOrElse(-1), @image.id.getOrElse(-1))"
                   >Delete</a>
               </div>

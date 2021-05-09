@@ -127,7 +127,7 @@ class UsersController @Inject() (
             case None => NotFound(views.html.albumNotFound())
           }
         }
-      ).recover { case e: Exception =>
+      ).recover { case _: Exception =>
         Ok(views.html.albumError())
       }
   }
