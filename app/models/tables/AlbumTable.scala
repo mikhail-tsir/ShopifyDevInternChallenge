@@ -7,6 +7,9 @@ private[models] trait AlbumTable extends UserTable {
   protected val driver: JdbcProfile
   import driver.api._
 
+  /**
+   * Table definition for the `image_repo.albums` table
+   */
   class Albums(tag: Tag) extends Table[Album](tag, Some("image_repo"), "albums") {
 
     /** ID column, auto-incremented primary key */
@@ -25,7 +28,8 @@ private[models] trait AlbumTable extends UserTable {
     def is_public = column[Boolean]("is_public")
 
     /** Mapping between table row and Album case class */
-    def * = (id.?, user_id.?, name, description, is_public) <> ((Album.apply _).tupled, Album.unapply)
+    def * =
+      (id.?, user_id.?, name, description, is_public) <> ((Album.apply _).tupled, Album.unapply)
 
     /** Foreign key on Users table */
     def owner = foreignKey("owner_fk", user_id, users)(_.id)

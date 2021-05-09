@@ -5,6 +5,9 @@ import models.Image
 import java.io.File
 import scala.concurrent.Future
 
+/**
+ * Abstract service for connecting to the cloud
+ */
 trait CloudStorageService {
 
   /**
@@ -15,6 +18,13 @@ trait CloudStorageService {
    * @return Id of uploaded image
    */
   def uploadImage(file: File, key: String): Future[Unit]
+
+  /**
+   * Deletes the given image from cloud storage
+   *
+   * @param filename The name of the file to delete
+   */
+  def deleteImage(filename: String): Future[Unit]
 
   /**
    * Gets the base64 encoding of an image

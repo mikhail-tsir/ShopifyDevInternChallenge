@@ -20,7 +20,10 @@ case class UserRequest[A] @Inject() (user: User, request: Request[A])(implicit
 
     /**
      * An action that handles incoming `UserRequest`s and blocks
-     *  the request if the user isn't logged in.
+     * the request if the user isn't logged in.
+     *
+     * Adds the current `User` object to the request so that it
+     *  can be accessed by other Actions requiring the user to be logged in.
      */
 class AuthenticatedUserAction @Inject() (val parser: BodyParsers.Default)(implicit
     val executionContext: ExecutionContext,

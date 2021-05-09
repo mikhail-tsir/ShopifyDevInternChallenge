@@ -7,6 +7,9 @@ private[models] trait ImageTable extends AlbumTable {
   protected val driver: JdbcProfile
   import driver.api._
 
+  /**
+   * Table definition for the `image_repo.images` table
+   */
   class Images(tag: Tag) extends Table[Image](tag, Some("image_repo"), "images") {
 
     /** ID column, auto-incremented primary key */

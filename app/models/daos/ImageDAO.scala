@@ -4,6 +4,9 @@ import models.{Album, Image}
 
 import scala.concurrent.Future
 
+/**
+ * Abstract Data Accessor Object for Images
+ */
 trait ImageDAO {
 
   /**

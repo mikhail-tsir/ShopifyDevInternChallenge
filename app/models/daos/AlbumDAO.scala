@@ -3,6 +3,9 @@ package models.daos
 import models.{Album, User}
 import scala.concurrent.Future
 
+/**
+ * Abstract Data Accessor Object for Albums
+ */
 trait AlbumDAO {
 
   /**

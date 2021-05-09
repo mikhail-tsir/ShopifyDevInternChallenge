@@ -24,9 +24,12 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class AWSCloudStorageImpl @Inject() (implicit config: Configuration, ec: ExecutionContext)
     extends CloudStorageService {
+
+  // Get region and bucket from config
   val region: Region     = Region.of(config.get[String]("aws.s3.region"))
   val bucketName: String = config.get[String]("aws.s3.bucketname")
 
+  // s3 client instance
   val s3: S3Client = S3Client
     .builder()
     .region(region)
@@ -51,6 +54,10 @@ class AWSCloudStorageImpl @Inject() (implicit config: Configuration, ec: Executi
 
     val imgObjectBytes = s3.getObjectAsBytes(objectRequest).asByteArray()
     Base64.getEncoder.encodeToString(imgObjectBytes)
+  }
+
+  override def deleteImage(filename: String): Future[Unit] = Future {
+    s3.deleteObject(new DeleteObjectRequest(bucketName, filename))
   }
 
 }

@@ -21,7 +21,7 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * Controller for displaying User pages
+ * Controller for handling everything a User does
  */
 @Singleton
 class UsersController @Inject() (
@@ -36,11 +36,17 @@ class UsersController @Inject() (
 ) extends AbstractController(cc)
     with I18nSupport {
 
+  /**
+   * Factories for creating actions containing the given album
+   */
+
+  // Current user has "viewer" permissions
   val authenticatedAlbumViewerAction = (albumId: Int) =>
     authenticatedUserAction
       .andThen(AlbumAction(albumId))
       .andThen(AlbumViewerAction.apply)
 
+  // Current user has "owner" permissions
   val authenticatedAlbumOwnerAction = (albumId: Int) =>
     authenticatedUserAction
       .andThen(AlbumAction(albumId))
@@ -50,31 +56,44 @@ class UsersController @Inject() (
    * Helper functions and declarations
    */
 
+  // Implicit declaration of the `Search Username` form so we don't have
+  //  instantiate it for every user page.
   implicit val searchUserForm: Form[String] = SearchUserForm.searchUserForm
 
   val addAlbumUrl: Call = routes.UsersController.handleAddAlbum
 
+  /**
+   * Generates the URL for POST requests for uploading images to the given album
+   * @param album The album to upload to
+   * @return `Call` to be used in the Upload Image form submission
+   */
   def uploadImageUrl(album: Album): Call =
     routes.UsersController.handleUploadImageRoute(s"${album.id.getOrElse(-1)}/upload")
 
+  // Fallback for asynchronous actions to render the `User Not Found` page
   def userNotFoundPage(implicit request: UserRequest[AnyContent]): Future[Result] = {
     Future.successful(NotFound(views.html.userNotFound()))
   }
 
+  // Fallback for asynchronous actions to render the `Album Not Found` page
   def albumNotFoundPage(implicit request: UserRequest[AnyContent]): Future[Result] = {
     Future.successful(NotFound(views.html.albumNotFound()))
   }
 
+  // Renders the user page for the current user
   def renderHomePage(implicit request: UserRequest[AnyContent]): Future[Result] = {
     for (_ <- userDao.getAlbums(request.user)) yield {
       Redirect(routes.UsersController.showUser(request.user.username), SEE_OTHER)
     }
   }
 
+  // Fallback for actions with dynamic routes where the route is invalid
   def invalidRoute = Action { _ =>
     BadRequest("Invalid route.")
   }
 
+  // Same as above but for actions that operate on `MultipartFormData`
+  //  (otherwise there's a type mismatch)
   def invalidRouteAuth =
     authenticatedUserAction(parse.multipartFormData).async { _ =>
       Future.successful {
@@ -86,7 +105,10 @@ class UsersController @Inject() (
    * Application route actions
    */
 
-  def showUser(username: String): Action[AnyContent] = authenticatedUserAction.async {
+  /**
+   * Renders a user's home page with all their albums
+   */
+  def showUser(username: String) = authenticatedUserAction.async {
     implicit request: UserRequest[AnyContent] =>
       userDao.find(username).flatMap {
         // If the searched-for user exists
@@ -104,10 +126,20 @@ class UsersController @Inject() (
       }
   }
 
+  /**
+   * Handles user search requests (calls the `showUser` action on the username)
+   * @param username The username to search
+   */
   def search(username: String): Action[AnyContent] = showUser(username)
 
-  def viewAlbum(id: Int): Action[AnyContent] = authenticatedAlbumViewerAction(id).async {
+  /**
+   * Renders the page for a user's Album
+   *
+   * @param id The id of the album to render
+   */
+  def viewAlbum(id: Int) = authenticatedAlbumViewerAction(id).async {
     implicit request: AlbumRequest[AnyContent] =>
+      // implicit UserRequest to be picked up by the HTML template
       implicit val userRequest: UserRequest[AnyContent] = request.request
       (
         for {
@@ -127,16 +159,23 @@ class UsersController @Inject() (
             case None => NotFound(views.html.albumNotFound())
           }
         }
-      ).recover { case _: Exception =>
-        Ok(views.html.albumError())
+      ).recover {
+        // Could not get album owner or could now load images from cloud storage
+        case _: Exception => Ok(views.html.albumError())
       }
   }
 
+  /**
+   * Renders the `Add Album` page for the current user
+   */
   def showAddAlbumPage: Action[AnyContent] = authenticatedUserAction {
     implicit request: UserRequest[AnyContent] =>
       Ok(views.html.addAlbum(addAlbumForm, addAlbumUrl))
   }
 
+  /**
+   * Handles `Add Album` form submission POST requests
+   */
   def handleAddAlbum: Action[AnyContent] = authenticatedUserAction.async {
     implicit request: UserRequest[AnyContent] =>
       val errorFunction = { badForm: Form[AddAlbumData] =>
@@ -153,6 +192,11 @@ class UsersController @Inject() (
       addAlbumForm.bindFromRequest().fold(errorFunction, successFunction)
   }
 
+  /**
+   * Handles DELETE requests to delete the given album
+   *
+   * @param id id of album to delete
+   */
   def deleteAlbum(id: Int): Action[AnyContent] = authenticatedAlbumOwnerAction(id).async {
     implicit request: AlbumRequest[AnyContent] =>
       implicit val userRequest: UserRequest[AnyContent] = request.request
@@ -161,16 +205,23 @@ class UsersController @Inject() (
       }
   }
 
+  /**
+   * Validates file extensions for image upload
+   *
+   * @param filename The name of the file to check
+   * @return True if extension is allowed, false otherwise.
+   */
   def validateFileType(filename: String): Boolean = {
     val allowedExtensions: Set[String] = Set("jpg", "png", "jpeg")
     allowedExtensions.contains(filename.split("\\.").toList.last)
   }
 
   /**
-   * Validates the route suffix for uploading image
+   * Validates the route suffix for uploading images.
+   * Must be of the form <album_id>/upload
    *
-   * @param suffix The route suffix
-   * @return The id of the object or None if suffix is invalid
+   * @param suffix The route suffix (after /album/)
+   * @return The id of the album or None if suffix is invalid
    */
   def validateUploadImageRoute(suffix: String): Option[Int] = {
     val components = suffix.split("/").toList
@@ -183,17 +234,35 @@ class UsersController @Inject() (
     if (isValid) components.head.toIntOption else None
   }
 
+  /**
+   * Validates and routes GET requests to upload image page
+   *
+   * @param suffix The suffix of the route (after /album/)
+   * @return The action to render the `Upload Image` page or
+   *         error page if suffix is invalid
+   */
   def showUploadImagePageRoute(suffix: String) =
     validateUploadImageRoute(suffix) match {
       case Some(id) => showUploadImagePage(id)
       case _        => invalidRoute
     }
 
+  /**
+   * Displays the `Upload Image` form for the given album
+   *
+   * @param albumId The id of the album to upload to
+   */
   def showUploadImagePage(albumId: Int) = authenticatedAlbumOwnerAction(albumId) {
     implicit request: AlbumRequest[AnyContent] =>
       Ok(views.html.uploadImage(postUrl = uploadImageUrl(request.album)))
   }
 
+  /**
+   * Validates and routes POST requests for upload image form submission
+   *
+   * @param suffix The suffix of the route (after /album/)
+   * @return The action to submit the form or error page if suffix is invalid
+   */
   def handleUploadImageRoute(suffix: String) = {
     validateUploadImageRoute(suffix) match {
       case Some(id) => handleUploadImage(id)
@@ -201,9 +270,15 @@ class UsersController @Inject() (
     }
   }
 
+  /**
+   * Handles image uploads
+   *
+   * @param albumId The id of the album to upload to
+   */
   def handleUploadImage(albumId: Int) = {
     authenticatedAlbumOwnerAction(albumId)(parse.multipartFormData).async { implicit request =>
       val album = request.album
+      // Generates an error function to display the given message
       val errorFunction: String => Form[UploadImageData] => Future[Result] =
         (flashMessage: String) =>
           _ =>
@@ -212,6 +287,7 @@ class UsersController @Inject() (
                 .flashing("error" -> flashMessage)
             )
 
+      // Generates a success function to upload the given file with the given file type
       val successFunction: (File, String) => UploadImageData => Future[Result] =
         (image, extension) => {
           uploadImageData: UploadImageData =>
@@ -255,6 +331,14 @@ class UsersController @Inject() (
     }
   }
 
+  /**
+   * Validates and routes DELETE requests for deleting images.
+   * Route suffix ix valid if it is of the form `<album_id>/<image_id>/delete`
+   *
+   * @param suffix Suffix of the route (after /album/)
+   * @return The action to delete the image if suffix is valid
+   *         or error page otherwise
+   */
   def deleteImageRoute(suffix: String) = {
     val components = suffix.split("/").toList
     val isValid: Boolean = components.length == 3 &&
@@ -271,6 +355,12 @@ class UsersController @Inject() (
     else invalidRoute
   }
 
+  /**
+   * Handles deleting images
+   *
+   * @param albumId The album to delete from
+   * @param imageId The image to delete
+   */
   def handleDeleteImage(albumId: Int, imageId: Int) =
     authenticatedAlbumOwnerAction(albumId).async { _ =>
       imageDao.delete(imageId).map { _ =>
@@ -279,7 +369,9 @@ class UsersController @Inject() (
       }
     }
 
-  // Log out action
+  /**
+   * Handles POST requests for logging out
+   */
   def logout: Action[AnyContent] = Action {
     Redirect(routes.SignInController.showSignInPage).withNewSession
   }

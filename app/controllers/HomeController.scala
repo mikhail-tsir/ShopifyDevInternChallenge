@@ -9,7 +9,7 @@ import play.api.mvc._
  */
 @Singleton
 class HomeController @Inject() (val controllerComponents: ControllerComponents)
-  extends BaseController {
+    extends BaseController {
 
   /**
    * Redirects to Sign Up page

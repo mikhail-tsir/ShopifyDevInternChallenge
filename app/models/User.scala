@@ -5,7 +5,7 @@ import play.api.libs.json._
 import scala.concurrent.Future
 
 /**
- * User model
+ * Model for describing and working with Users
  *
  * @param id Unique id of user
  * @param username User's (unique) username

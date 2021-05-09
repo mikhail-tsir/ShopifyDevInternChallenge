@@ -9,7 +9,7 @@ import models.{Album, Image, User}
 import models.tables.ImageTable
 
 /**
- * Data Accessor Object for Albums, handles all DB interaction
+ * Implementatino of the Data Accessor Object for Albums, handles all DB interaction
  */
 @Singleton
 class ImageDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
