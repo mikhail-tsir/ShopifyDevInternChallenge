@@ -49,9 +49,11 @@ class ImageDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
   override def getImages(album: Album): Future[List[Image]] = album.id match {
     case Some(id) =>
       db.run {
-        images.filter(_.id === id).result
+        images.filter(_.album_id === id).result
       }.map(_.toList)
-    case None => Future.successful(List())
+    case None => {
+      Future.successful(List())
+    }
   }
 
 }

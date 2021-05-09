@@ -14,7 +14,7 @@ POST        /signIn                 controllers.SignInController.handleSignIn
 GET         /user/:username         controllers.UsersController.showUser(username)
 POST        /user/logout            controllers.UsersController.logout
 
-GET         /albums/:id             controllers.UsersController.viewAlbum(id: Int)
+GET         /album/:id             controllers.UsersController.viewAlbum(id: Int)
 
 GET         /addAlbum               controllers.UsersController.showAddAlbumPage
 POST        /addAlbum               controllers.UsersController.handleAddAlbum

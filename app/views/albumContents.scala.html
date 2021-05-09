@@ -38,6 +38,9 @@
         </div>
         <div class="card-footer">
             <div class="card-footer-item">
+              <a href="@routes.UsersController.showUploadImagePageRoute(s"${album.id.getOrElse(-1)}/upload")">Upload Image</a>
+            </div>
+            <div class="card-footer-item">
                 <form id="delete" action="@routes.UsersController.deleteAlbum(album.id.getOrElse(-1))" method="post">
                     @helper.CSRF.formField
                 <a href="javascript:;" onclick="document.getElementById('delete').submit();">Delete Album</a>
@@ -50,12 +53,24 @@
         </div>
     </div>
 
-    @if(imgList.isEmpty) {
-        This album is empty.
-    } else {
-        @imgList.map {
-            case (img, base64) => {
-                @image(img, base64, album)
-            }
+    @request.flash.data.map {
+        case ("success", value) => {
+            <div class="help is-success">@value</div>
+        }
+        case (_, value) => {
+            <div class="help is-danger">@value</div>
         }
     }
+    <br></br>
+  <div class="columns is-multiline">
+      @if(imgList.isEmpty) {
+          This album is empty.
+      } else {
+          @imgList.map {
+              case (img, base64) => {
+                  @image(img, base64, album)
+              }
+          }
+      }
+  </div>
+

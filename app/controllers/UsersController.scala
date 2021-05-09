@@ -162,7 +162,7 @@ class UsersController @Inject() (
   }
 
   def validateFileType(filename: String): Boolean = {
-    val allowedExtensions: Set[String] = Set("jpg", "png")
+    val allowedExtensions: Set[String] = Set("jpg", "png", "jpeg")
     allowedExtensions.contains(filename.split("\\.").toList.last)
   }
 
@@ -226,7 +226,9 @@ class UsersController @Inject() (
                   routes.UsersController.viewAlbum(album.id.getOrElse(-1))
                 ).flashing("success" -> "Image uploaded successfully!")
               }
-            ).recover { case _: Exception =>
+            ).recover { case e: Exception =>
+              println("EXCEPTION: ")
+              println(e)
               Redirect(
                 routes.UsersController.viewAlbum(album.id.getOrElse(-1))
               ).flashing("error" -> "There was an error uploading your image.")
@@ -254,7 +256,6 @@ class UsersController @Inject() (
   }
 
   def deleteImageRoute(suffix: String) = {
-    println("DELETING IMAGE")
     val components = suffix.split("/").toList
     val isValid: Boolean = components.length == 3 &&
       components.head.toIntOption.isDefined &&
@@ -265,21 +266,16 @@ class UsersController @Inject() (
 
     if (isValid) (components.head.toIntOption, components(1).toIntOption) match {
       case (Some(albumId), Some(imageId)) => handleDeleteImage(albumId, imageId)
-      case _ => {
-        println("INVALID ROUTE 1")
-        invalidRoute
-      }
+      case _                              => invalidRoute
     }
-    else {
-      println("INVALID ROUTE 2")
-      invalidRoute
-    }
+    else invalidRoute
   }
 
   def handleDeleteImage(albumId: Int, imageId: Int) =
     authenticatedAlbumOwnerAction(albumId).async { _ =>
       imageDao.delete(imageId).map { _ =>
         Redirect(routes.UsersController.viewAlbum(albumId))
+          .flashing("success" -> "Image deleted successfully")
       }
     }
 

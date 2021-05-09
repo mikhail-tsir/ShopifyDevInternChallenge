@@ -6,7 +6,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.{JdbcProfile, PostgresProfile}
 import models.{Album, User}
-import models.tables.AlbumTable
+import models.tables.{AlbumTable, ImageTable}
 
 /**
  * Data Accessor Object for Albums, handles all DB interaction
@@ -15,7 +15,8 @@ import models.tables.AlbumTable
 class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
     ec: ExecutionContext
 ) extends AlbumDAO
-    with AlbumTable {
+    with AlbumTable
+    with ImageTable {
 
   protected val driver: JdbcProfile = PostgresProfile
   private val dbConfig              = dbConfigProvider.get[JdbcProfile]
@@ -36,10 +37,12 @@ class AlbumDAOImpl @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit
 
   // Deletes the given album from the db
   override def delete(id: Int): Future[Option[Album]] = {
-    val query = albums.filter(_.id === id)
+    val foundAlbum  = albums.filter(_.id === id)
+    val foundImages = images.filter(_.album_id === id)
     val action = for {
-      results <- query.result
-      _       <- query.delete
+      results <- foundAlbum.result
+      _       <- foundAlbum.delete
+      _       <- foundImages.delete
     } yield results.headOption
 
     db.run(action)
