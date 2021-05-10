@@ -1,3 +1,4 @@
+![screencap](https://github.com/mikhail-tsir/ShopifyDevInternChallenge/blob/main/public/images/screenshot.png)
 # Image Repository App
 An Image repository app built with the [Play framework](https://www.playframework.com/) in Scala.
 
