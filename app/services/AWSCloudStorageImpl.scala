@@ -57,7 +57,13 @@ class AWSCloudStorageImpl @Inject() (implicit config: Configuration, ec: Executi
   }
 
   override def deleteImage(filename: String): Future[Unit] = Future {
-    s3.deleteObject(new DeleteObjectRequest(bucketName, filename))
+    val objectRequest: DeleteObjectRequest = DeleteObjectRequest
+      .builder()
+      .bucket(bucketName)
+      .key(filename)
+      .build()
+
+    s3.deleteObject(objectRequest)
   }
 
 }

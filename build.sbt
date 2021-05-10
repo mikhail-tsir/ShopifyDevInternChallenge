@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp"        % slickVersion,
   "com.typesafe.play"  %% "play-slick"            % playSlickVersion,
   "com.typesafe.play"  %% "play-slick-evolutions" % playSlickVersion,
-  "org.postgresql"      % "postgresql"            % "9.4-1206-jdbc42",
+  "org.postgresql"      % "postgresql"            % "9.4-1201-jdbc41",
   "net.codingwell"     %% "scala-guice"           % "4.2.6",
   filters
 )
