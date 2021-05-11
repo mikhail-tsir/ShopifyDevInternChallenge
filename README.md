@@ -102,7 +102,7 @@ And finally,
 ```bash
 sbt run
 ```
-You may be prompted with `Database needs evolution`, in which case you can click
+and navigate to `http://localhost:9000`. You may be prompted with `Database needs evolution`, in which case you can click
 `Apply evolution`.
 
 ### Run tests
