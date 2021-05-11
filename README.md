@@ -2,6 +2,8 @@
 # Image Repository App
 An Image repository app built with the [Play framework](https://www.playframework.com/) in Scala.
 
+You can play around with it here: [https://intense-coast-99475.herokuapp.com/](https://intense-coast-99475.herokuapp.com/)
+
 I wanted to challenge myself and learn something new, so I decided to do
 take on functional programming and do the whole thing in Scala.
 
