@@ -15,4 +15,3 @@ server.pid
 /dist/
 .cache
 .env
-Procfile
